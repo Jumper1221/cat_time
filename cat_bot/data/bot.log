@@ -1,0 +1,54 @@
+2025-07-20 12:38:35,919 - database - INFO - База данных успешно инициализирована.
+2025-07-20 12:38:37,753 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-07-20 12:38:37,755 - apscheduler.scheduler - INFO - Added job "send_daily_cats" to job store "default"
+2025-07-20 12:38:37,755 - apscheduler.scheduler - INFO - Scheduler started
+2025-07-20 12:38:37,756 - __main__ - INFO - Бот запускается...
+2025-07-20 12:38:40,687 - __main__ - WARNING - Не удалось отправить сообщение администратору (550219311): Telegram server says - Bad Request: chat not found
+2025-07-20 12:38:40,737 - aiogram.dispatcher - INFO - Start polling
+2025-07-20 12:38:40,790 - aiogram.dispatcher - INFO - Run polling for bot @CatTimeBot id=7234054806 - 'cat_time'
+2025-07-20 12:38:58,477 - aiogram.event - INFO - Update id=976092385 is handled. Duration 234 ms by bot id=7234054806
+2025-07-20 12:39:04,216 - aiogram.event - INFO - Update id=976092386 is handled. Duration 2061 ms by bot id=7234054806
+2025-07-20 12:39:08,844 - database - INFO - Пользователь 550219311 подписался на рассылку.
+2025-07-20 12:39:08,976 - aiogram.event - INFO - Update id=976092387 is handled. Duration 141 ms by bot id=7234054806
+2025-07-20 12:39:12,739 - aiogram.event - INFO - Update id=976092388 is handled. Duration 827 ms by bot id=7234054806
+2025-07-20 12:45:08,754 - aiogram.event - INFO - Update id=976092389 is handled. Duration 297 ms by bot id=7234054806
+2025-07-20 12:45:12,729 - aiogram.event - INFO - Update id=976092390 is handled. Duration 827 ms by bot id=7234054806
+2025-07-20 12:45:27,094 - database - INFO - Пользователь 951045997 подписался на рассылку.
+2025-07-20 12:45:27,219 - aiogram.event - INFO - Update id=976092391 is handled. Duration 125 ms by bot id=7234054806
+2025-07-20 12:45:31,142 - aiogram.event - INFO - Update id=976092392 is handled. Duration 718 ms by bot id=7234054806
+2025-07-20 12:45:36,248 - aiogram.event - INFO - Update id=976092393 is handled. Duration 717 ms by bot id=7234054806
+2025-07-20 12:47:53,254 - aiogram.event - INFO - Update id=976092394 is handled. Duration 1000 ms by bot id=7234054806
+2025-07-20 12:48:00,597 - aiogram.event - INFO - Update id=976092395 is handled. Duration 93 ms by bot id=7234054806
+2025-07-20 12:48:11,804 - aiogram.event - INFO - Update id=976092396 is handled. Duration 1031 ms by bot id=7234054806
+2025-07-20 12:51:55,194 - aiogram.dispatcher - INFO - Polling stopped
+2025-07-20 12:51:55,453 - aiogram.dispatcher - INFO - Polling stopped for bot @CatTimeBot id=7234054806 - 'cat_time'
+2025-07-20 12:51:55,454 - __main__ - INFO - Бот остановлен.
+2025-07-20 12:56:06,289 - database - INFO - База данных успешно инициализирована.
+2025-07-20 12:56:06,585 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-07-20 12:56:06,587 - apscheduler.scheduler - INFO - Added job "send_daily_cats" to job store "default"
+2025-07-20 12:56:06,587 - apscheduler.scheduler - INFO - Scheduler started
+2025-07-20 12:56:06,587 - __main__ - INFO - Бот запускается...
+2025-07-20 12:56:06,992 - aiogram.dispatcher - INFO - Start polling
+2025-07-20 12:56:07,042 - aiogram.dispatcher - INFO - Run polling for bot @CatTimeBot id=7234054806 - 'cat_time'
+2025-07-20 12:56:21,729 - aiogram.event - INFO - Update id=976092397 is handled. Duration 782 ms by bot id=7234054806
+2025-07-20 12:56:25,799 - aiogram.event - INFO - Update id=976092398 is handled. Duration 969 ms by bot id=7234054806
+2025-07-20 12:56:29,940 - database - INFO - Пользователь 550219311 отписался от рассылки.
+2025-07-20 12:56:30,155 - aiogram.event - INFO - Update id=976092399 is handled. Duration 218 ms by bot id=7234054806
+2025-07-20 12:56:32,033 - database - INFO - Пользователь 550219311 подписался на рассылку.
+2025-07-20 12:56:32,163 - aiogram.event - INFO - Update id=976092400 is handled. Duration 140 ms by bot id=7234054806
+2025-07-20 12:56:43,778 - aiogram.event - INFO - Update id=976092401 is handled. Duration 79 ms by bot id=7234054806
+2025-07-20 12:56:46,990 - aiogram.event - INFO - Update id=976092402 is handled. Duration 141 ms by bot id=7234054806
+2025-07-20 12:57:33,310 - aiogram.dispatcher - INFO - Polling stopped
+2025-07-20 12:57:33,563 - aiogram.dispatcher - INFO - Polling stopped for bot @CatTimeBot id=7234054806 - 'cat_time'
+2025-07-20 12:57:33,564 - __main__ - INFO - Бот остановлен.
+2025-07-20 12:58:45,586 - database - INFO - База данных успешно инициализирована.
+2025-07-20 12:58:45,899 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-07-20 12:58:45,900 - apscheduler.scheduler - INFO - Added job "send_daily_cats" to job store "default"
+2025-07-20 12:58:45,901 - apscheduler.scheduler - INFO - Scheduler started
+2025-07-20 12:58:45,901 - __main__ - INFO - Бот запускается...
+2025-07-20 12:58:46,720 - aiogram.dispatcher - INFO - Start polling
+2025-07-20 12:58:46,773 - aiogram.dispatcher - INFO - Run polling for bot @CatTimeBot id=7234054806 - 'cat_time'
+2025-07-20 12:58:52,374 - aiogram.event - INFO - Update id=976092403 is handled. Duration 250 ms by bot id=7234054806
+2025-07-20 12:58:55,003 - aiogram.event - INFO - Update id=976092404 is handled. Duration 1281 ms by bot id=7234054806
+2025-07-20 12:59:00,032 - aiogram.event - INFO - Update id=976092405 is handled. Duration 1157 ms by bot id=7234054806
+2025-07-20 12:59:02,950 - aiogram.event - INFO - Update id=976092406 is handled. Duration 1186 ms by bot id=7234054806
