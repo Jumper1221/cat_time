@@ -1,7 +1,6 @@
 import logging
 from typing import List
 from database.connection import get_db_connection
-from database.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +116,7 @@ async def get_user_timezone(user_id: int) -> str:
     db_conn = get_db_connection()
     if not db_conn:
         logger.error("Database connection not initialized")
-        return "Europe/Moscow" # Default timezone
+        return "Europe/Moscow"  # Default timezone
 
     try:
         rows = await db_conn.execute_query(
@@ -144,8 +143,6 @@ async def update_user_timezone(user_id: int, timezone: str):
             "UPDATE users SET timezone = ? WHERE user_id = ?",
             (timezone, user_id),
         )
-        logger.info(
-            f"Timezone for user {user_id} updated to {timezone}."
-        )
+        logger.info(f"Timezone for user {user_id} updated to {timezone}.")
     except Exception as e:
         logger.error(f"Error updating user timezone: {e}")

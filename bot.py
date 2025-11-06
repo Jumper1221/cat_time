@@ -1,11 +1,10 @@
 import asyncio
-from aiogram import Bot
 from aiogram.types import BotCommand
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config.settings import BOT_TOKEN, CAT_API_KEY, DATABASE_NAME, get_admin_ids, logger
 from bot.core import create_bot, create_dispatcher
-from database.connection import init_db_connection, get_db_connection
+from database.connection import init_db_connection
 from users.handlers import router as user_router
 from admin.handlers import admin_router
 from admin.filters import IsAdmin
@@ -62,7 +61,7 @@ async def main():
         BotCommand(command="/cat", description="Получить случайного кота"),
     ]
     await bot.set_my_commands(user_commands)
-    
+
     if admin_ids:
         # Устанавливаем команды бота для администраторов (включая пользовательские команды)
         admin_commands = [
@@ -73,6 +72,7 @@ async def main():
         ]
         # Actually, in aiogram 3.x we need to use BotCommandScopeChat for specific users
         from aiogram.types import BotCommandScopeChat
+
         for admin_id in admin_ids:
             admin_scope = BotCommandScopeChat(chat_id=admin_id)
             await bot.set_my_commands(admin_commands, scope=admin_scope)
