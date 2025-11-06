@@ -8,6 +8,7 @@ from users.handlers import router as user_router
 from admin.handlers import admin_router
 from admin.filters import IsAdmin
 from services.scheduler import send_daily_cats
+from admin.keyboards import get_admin_reply_keyboard
 
 
 async def main():
@@ -28,6 +29,7 @@ async def main():
     # Передаем пути и ключи в хэндлеры через middleware
     dp["db_path"] = DATABASE_NAME
     dp["cat_api_key"] = CAT_API_KEY
+    dp["bot"] = bot
 
     # Регистрируем роутеры
     dp.include_router(user_router)
@@ -51,7 +53,17 @@ async def main():
     logger.info("Бот запускается...")
     if admin_ids:
         try:
-            await bot.send_message(admin_ids[0], "Бот успешно запущен!")
+            # Get user count for admin keyboard
+            from database.users import get_all_users
+
+            users = await get_all_users(DATABASE_NAME)
+            user_count = len(users)
+
+            await bot.send_message(
+                admin_ids[0],
+                "Бот успешно запущен!",
+                reply_markup=get_admin_reply_keyboard(user_count),
+            )
         except Exception as e:
             logger.warning(
                 f"Не удалось отправить сообщение администратору ({admin_ids[0]}): {e}"

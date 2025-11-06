@@ -17,10 +17,32 @@ logger = logging.getLogger(__name__)
 async def cmd_start(message: Message, db_path: str):
     user_id = message.from_user.id
     is_subscribed = await is_user_subscribed(db_path, user_id)
+
+    # Always show the main inline keyboard to all users
+    inline_keyboard = kb.get_main_keyboard(is_subscribed)
     await message.answer(
         "Привет! Я бот, который будет присылать тебе котиков 😺",
-        reply_markup=kb.get_main_keyboard(is_subscribed),
+        reply_markup=inline_keyboard,
     )
+
+    # For admin users, also send the reply keyboard to show at the bottom of the app
+    try:
+        from admin.keyboards import get_admin_reply_keyboard
+        from config.settings import get_admin_ids
+
+        admin_ids = get_admin_ids()
+        if user_id in admin_ids:
+            # Get user count for admin keyboard
+            users = await get_all_users(db_path)
+            user_count = len(users)
+            reply_keyboard = get_admin_reply_keyboard(user_count)
+            await message.answer(
+                "Вы админ бота. Вот клавиатура для административных функций:",
+                reply_markup=reply_keyboard,
+            )
+    except ImportError:
+        # If admin module is not available, skip
+        pass
 
 
 @router.callback_query(F.data == "subscribe")
@@ -28,9 +50,13 @@ async def cb_subscribe(callback: CallbackQuery, db_path: str):
     user_id = callback.from_user.id
     await add_user(db_path, user_id)
     await callback.answer("Вы успешно подписались на рассылку! 🎉", show_alert=True)
-    await callback.message.edit_reply_markup(
-        reply_markup=kb.get_main_keyboard(is_subscribed=True)
-    )
+
+    # Show the updated inline keyboard
+    keyboard = kb.get_main_keyboard(is_subscribed=True)
+    try:
+        await callback.message.edit_reply_markup(reply_markup=keyboard)
+    except Exception as e:
+        logger.error(f"Ошибка обновления клавиатуры: {e}")
 
 
 @router.callback_query(F.data == "unsubscribe")
@@ -38,9 +64,13 @@ async def cb_unsubscribe(callback: CallbackQuery, db_path: str):
     user_id = callback.from_user.id
     await remove_user(db_path, user_id)
     await callback.answer("Вы отписались от рассылки. 😿", show_alert=True)
-    await callback.message.edit_reply_markup(
-        reply_markup=kb.get_main_keyboard(is_subscribed=False)
-    )
+
+    # Show the updated inline keyboard
+    keyboard = kb.get_main_keyboard(is_subscribed=False)
+    try:
+        await callback.message.edit_reply_markup(reply_markup=keyboard)
+    except Exception as e:
+        logger.error(f"Ошибка обновления клавиатуры: {e}")
 
 
 @router.callback_query(F.data == "get_cat")
@@ -60,16 +90,31 @@ async def cb_get_cat(
             # 2. Снова отправляем меню с кнопками
             user_id = callback.from_user.id
             is_subscribed = await is_user_subscribed(db_path, user_id)
-            await callback.message.answer(
-                "Что делаем дальше?", reply_markup=kb.get_main_keyboard(is_subscribed)
-            )
+            keyboard = kb.get_main_keyboard(is_subscribed)
+
+            try:
+                await callback.message.answer("Что делаем дальше?", reply_markup=keyboard)
+            except Exception as e:
+                logger.error(f"Ошибка отправки сообщения: {e}")
 
         except Exception as e:
             logger.error(f"Ошибка отправки фото: {e}")
-            await callback.message.answer(
-                "Ой, не удалось загрузить котика. Попробуйте еще раз."
-            )
+            try:
+                await callback.message.answer(
+                    "Ой, не удалось загрузить котика. Попробуйте еще раз."
+                )
+            except Exception as e:
+                logger.error(f"Ошибка отправки сообщения: {e}")
+                await callback.answer(
+                    "Ой, не удалось загрузить котика. Попробуйте еще раз.", show_alert=True
+                )
     else:
-        await callback.message.answer(
-            "Что-то пошло не так, котик убежал. Попробуйте позже."
-        )
+        try:
+            await callback.message.answer(
+                "Что-то пошло не так, котик убежал. Попробуйте позже."
+            )
+        except Exception as e:
+            logger.error(f"Ошибка отправки сообщения: {e}")
+            await callback.answer(
+                "Что-то пошло не так, котик убежал. Попробуйте позже.", show_alert=True
+            )
