@@ -5,6 +5,7 @@ from aiogram.types import Message, CallbackQuery, BufferedInputFile
 from aiogram.filters import CommandStart, Command
 
 from database.users import is_user_subscribed, add_user, remove_user, get_all_users
+from database.bot_users import is_bot_user, add_bot_user
 import users.keyboards as kb
 from services.cat_api import get_cat_image_url
 
@@ -16,7 +17,12 @@ logger = logging.getLogger(__name__)
 @router.message(CommandStart())
 async def cmd_start(message: Message, db_path: str):
     user_id = message.from_user.id
-    is_subscribed = await is_user_subscribed(db_path, user_id)
+
+    # Check if this is the user's first interaction with the bot
+    if not await is_bot_user(user_id):
+        await add_bot_user(user_id)
+
+    is_subscribed = await is_user_subscribed(user_id)
 
     # Always show the main inline keyboard to all users
     inline_keyboard = kb.get_main_keyboard(is_subscribed)
@@ -33,7 +39,7 @@ async def cmd_start(message: Message, db_path: str):
         admin_ids = get_admin_ids()
         if user_id in admin_ids:
             # Get user count for admin keyboard
-            users = await get_all_users(db_path)
+            users = await get_all_users()
             user_count = len(users)
             reply_keyboard = get_admin_reply_keyboard(user_count)
             await message.answer(
@@ -48,7 +54,12 @@ async def cmd_start(message: Message, db_path: str):
 @router.callback_query(F.data == "subscribe")
 async def cb_subscribe(callback: CallbackQuery, db_path: str):
     user_id = callback.from_user.id
-    await add_user(db_path, user_id)
+
+    # Check if this is the user's first interaction with the bot
+    if not await is_bot_user(user_id):
+        await add_bot_user(user_id)
+
+    await add_user(user_id)
     await callback.answer("Вы успешно подписались на рассылку! 🎉", show_alert=True)
 
     # Show the updated inline keyboard
@@ -62,7 +73,12 @@ async def cb_subscribe(callback: CallbackQuery, db_path: str):
 @router.callback_query(F.data == "unsubscribe")
 async def cb_unsubscribe(callback: CallbackQuery, db_path: str):
     user_id = callback.from_user.id
-    await remove_user(db_path, user_id)
+
+    # Check if this is the user's first interaction with the bot
+    if not await is_bot_user(user_id):
+        await add_bot_user(user_id)
+
+    await remove_user(user_id)
     await callback.answer("Вы отписались от рассылки. 😿", show_alert=True)
 
     # Show the updated inline keyboard
@@ -77,6 +93,12 @@ async def cb_unsubscribe(callback: CallbackQuery, db_path: str):
 async def cb_get_cat(
     callback: CallbackQuery, cat_api_key: str, db_path: str
 ):  # <-- Добавили db_path
+    user_id = callback.from_user.id
+
+    # Check if this is the user's first interaction with the bot
+    if not await is_bot_user(user_id):
+        await add_bot_user(user_id)
+
     await callback.answer("Ищу котика...", show_alert=False)
     image_url = await get_cat_image_url(cat_api_key)
 
@@ -88,12 +110,13 @@ async def cb_get_cat(
             )
 
             # 2. Снова отправляем меню с кнопками
-            user_id = callback.from_user.id
-            is_subscribed = await is_user_subscribed(db_path, user_id)
+            is_subscribed = await is_user_subscribed(user_id)
             keyboard = kb.get_main_keyboard(is_subscribed)
 
             try:
-                await callback.message.answer("Что делаем дальше?", reply_markup=keyboard)
+                await callback.message.answer(
+                    "Что делаем дальше?", reply_markup=keyboard
+                )
             except Exception as e:
                 logger.error(f"Ошибка отправки сообщения: {e}")
 
@@ -106,7 +129,8 @@ async def cb_get_cat(
             except Exception as e:
                 logger.error(f"Ошибка отправки сообщения: {e}")
                 await callback.answer(
-                    "Ой, не удалось загрузить котика. Попробуйте еще раз.", show_alert=True
+                    "Ой, не удалось загрузить котика. Попробуйте еще раз.",
+                    show_alert=True,
                 )
     else:
         try:

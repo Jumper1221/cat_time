@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 async def send_daily_cats(bot: Bot, db_path: str, cat_api_key: str):
     """Функция для ежедневной рассылки котов."""
     logger.info("Начало ежедневной рассылки...")
-    users = await get_all_users(db_path)
+    users = await get_all_users()
     image_url = await get_cat_image_url(cat_api_key)
 
     if not image_url:
@@ -24,11 +24,11 @@ async def send_daily_cats(bot: Bot, db_path: str, cat_api_key: str):
                 chat_id=user_id, photo=image_url, caption="Ваш ежедневный котик! 🐾"
             )
             sent_count += 1
-        except (TelegramForbiddenError, TelegramBadRequest) as e:
+        except (TelegramForbiddenError, TelegramBadRequest):
             logger.warning(
                 f"Пользователь {user_id} заблокировал бота или чат не найден. Удаляем из базы."
             )
-            await remove_user(db_path, user_id)
+            await remove_user(user_id)
         except Exception as e:
             logger.error(f"Не удалось отправить сообщение пользователю {user_id}: {e}")
 

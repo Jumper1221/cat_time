@@ -3,7 +3,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config.settings import BOT_TOKEN, CAT_API_KEY, DATABASE_NAME, get_admin_ids, logger
 from bot.core import create_bot, create_dispatcher
-from database.models import init_db
+from database.connection import init_db_connection, get_db_connection
 from users.handlers import router as user_router
 from admin.handlers import admin_router
 from admin.filters import IsAdmin
@@ -21,7 +21,8 @@ async def main():
     admin_ids = get_admin_ids()
 
     # Инициализация базы данных
-    await init_db(DATABASE_NAME)
+    db_connection = init_db_connection(DATABASE_NAME)
+    await db_connection.init_db()
 
     bot = create_bot()
     dp = create_dispatcher()
@@ -55,14 +56,17 @@ async def main():
         try:
             # Get user count for admin keyboard
             from database.users import get_all_users
+            from database.bot_users import get_all_bot_users
 
-            users = await get_all_users(DATABASE_NAME)
+            users = await get_all_users()
             user_count = len(users)
+            bot_users = await get_all_bot_users()
+            bot_user_count = len(bot_users)
 
             await bot.send_message(
                 admin_ids[0],
                 "Бот успешно запущен!",
-                reply_markup=get_admin_reply_keyboard(user_count),
+                reply_markup=get_admin_reply_keyboard(user_count, bot_user_count),
             )
         except Exception as e:
             logger.warning(
