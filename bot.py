@@ -1,48 +1,13 @@
 import asyncio
-import logging
-import os
-from logging.handlers import RotatingFileHandler
-
-from aiogram import Bot, Dispatcher
-from aiogram.fsm.storage.memory import MemoryStorage
-from dotenv import load_dotenv
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-import database as db
-from handlers import router as main_router, admin_router  # 1. Импортируем оба роутера
-from scheduler import send_daily_cats
-from filters import IsAdmin  # 2. Импортируем фильтр
-
-# Загружаем переменные окружения в самом начале
-load_dotenv()
-
-# Настройка логирования
-log_formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-log_file = os.getenv("LOG_FILE", "data/bot.log")
-
-# Создаем папку для логов, если ее нет
-os.makedirs(os.path.dirname(log_file), exist_ok=True)
-
-# Логгер для файла с ротацией
-file_handler = RotatingFileHandler(
-    log_file, maxBytes=5 * 1024 * 1024, backupCount=2, encoding="utf-8"
-)
-file_handler.setFormatter(log_formatter)
-
-# Логгер для вывода в консоль
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(log_formatter)
-
-logging.basicConfig(level=logging.INFO, handlers=[file_handler, console_handler])
-logger = logging.getLogger(__name__)
-
-# Читаем переменные окружения
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-CAT_API_KEY = os.getenv("CAT_API_KEY")
-DATABASE_NAME = os.getenv("DATABASE_NAME")
-ADMIN_ID = os.getenv("ADMIN_ID")
+from config.settings import BOT_TOKEN, CAT_API_KEY, DATABASE_NAME, get_admin_ids, logger
+from bot.core import create_bot, create_dispatcher
+from database.models import init_db
+from users.handlers import router as user_router
+from admin.handlers import admin_router
+from admin.filters import IsAdmin
+from services.scheduler import send_daily_cats
 
 
 async def main():
@@ -52,34 +17,20 @@ async def main():
         )
         return
 
-    # 3. Обрабатываем ADMIN_ID и создаем список для фильтра
-    if not ADMIN_ID:
-        logger.warning(
-            "Переменная ADMIN_ID не установлена. Админ-функции будут недоступны."
-        )
-        admin_ids = []
-    else:
-        try:
-            admin_ids = [int(ADMIN_ID)]
-        except ValueError:
-            logger.error(
-                "ADMIN_ID имеет неверный формат. Это должно быть число. Админ-функции отключены."
-            )
-            admin_ids = []
+    admin_ids = get_admin_ids()
 
     # Инициализация базы данных
-    await db.init_db(DATABASE_NAME)
+    await init_db(DATABASE_NAME)
 
-    bot = Bot(token=BOT_TOKEN, parse_mode="HTML")  # Добавим parse_mode по умолчанию
-    storage = MemoryStorage()
-    dp = Dispatcher(storage=storage)
+    bot = create_bot()
+    dp = create_dispatcher()
 
     # Передаем пути и ключи в хэндлеры через middleware
     dp["db_path"] = DATABASE_NAME
     dp["cat_api_key"] = CAT_API_KEY
 
-    # 4. Регистрируем роутеры
-    dp.include_router(main_router)
+    # Регистрируем роутеры
+    dp.include_router(user_router)
 
     # Применяем фильтр IsAdmin ко всем хендлерам в admin_router
     admin_router.message.filter(IsAdmin(admin_ids))
@@ -87,7 +38,6 @@ async def main():
     dp.include_router(admin_router)
 
     # Настройка и запуск планировщика
-    # Важно: Укажите ваш часовой пояс! Например, "Europe/Moscow", "Asia/Yekaterinburg"
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
     scheduler.add_job(
         send_daily_cats,
