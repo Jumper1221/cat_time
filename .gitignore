@@ -13,6 +13,8 @@ venv/
 
 # Данные и логи
 /data/
+*.db
+*.log
 
 # Файлы IDE
 .idea/

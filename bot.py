@@ -1,4 +1,6 @@
 import asyncio
+from aiogram import Bot
+from aiogram.types import BotCommand
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config.settings import BOT_TOKEN, CAT_API_KEY, DATABASE_NAME, get_admin_ids, logger
@@ -41,17 +43,40 @@ async def main():
     dp.include_router(admin_router)
 
     # Настройка и запуск планировщика
-    scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+    scheduler = AsyncIOScheduler(timezone="UTC")
+    # Run the scheduler every hour to check if any users should receive their daily cat
     scheduler.add_job(
         send_daily_cats,
         "cron",
-        hour=9,
         minute=0,
         args=(bot, DATABASE_NAME, CAT_API_KEY),
     )
     scheduler.start()
 
     logger.info("Бот запускается...")
+
+    # Устанавливаем команды бота для обычных пользователей (по умолчанию)
+    user_commands = [
+        BotCommand(command="/start", description="Запустить бота"),
+        BotCommand(command="/settings", description="Настройки бота"),
+        BotCommand(command="/cat", description="Получить случайного кота"),
+    ]
+    await bot.set_my_commands(user_commands)
+    
+    if admin_ids:
+        # Устанавливаем команды бота для администраторов (включая пользовательские команды)
+        admin_commands = [
+            BotCommand(command="/start", description="Запустить бота"),
+            BotCommand(command="/settings", description="Настройки бота"),
+            BotCommand(command="/cat", description="Получить случайного кота"),
+            BotCommand(command="/admin", description="Админ-панель"),
+        ]
+        # Actually, in aiogram 3.x we need to use BotCommandScopeChat for specific users
+        from aiogram.types import BotCommandScopeChat
+        for admin_id in admin_ids:
+            admin_scope = BotCommandScopeChat(chat_id=admin_id)
+            await bot.set_my_commands(admin_commands, scope=admin_scope)
+
     if admin_ids:
         try:
             # Get user count for admin keyboard

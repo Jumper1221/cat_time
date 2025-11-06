@@ -21,18 +21,23 @@ class DatabaseConnection:
     async def init_db(self):
         """Инициализирует базу данных и создает таблицы, если они не существуют."""
         async with self.get_db() as db:
+            # Configure database to use UTC
+            await db.execute("PRAGMA timezone = 'UTC'")
+
             # Таблица для подписчиков
             await db.execute("""
                 CREATE TABLE IF NOT EXISTS users (
                     user_id INTEGER PRIMARY KEY,
-                    subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    subscribed_at TIMESTAMP DEFAULT (datetime('now', 'utc')),
+                    daily_cat_time INTEGER DEFAULT 9,
+                    timezone TEXT DEFAULT 'UTC'
                 )
             """)
             # Таблица для всех пользователей, которые использовали бота
             await db.execute("""
                 CREATE TABLE IF NOT EXISTS bot_users (
                     user_id INTEGER PRIMARY KEY,
-                    first_used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    first_used_at TIMESTAMP DEFAULT (datetime('now', 'utc'))
                 )
             """)
             await db.commit()
